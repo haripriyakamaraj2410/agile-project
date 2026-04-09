@@ -27,7 +27,6 @@ pipeline {
                     usernameVariable: 'USERNAME',
                     passwordVariable: 'PASSWORD'
                 )]) {
-
                     bat '''
                     echo %PASSWORD% | docker login -u %USERNAME% --password-stdin
                     docker push %IMAGE_NAME%:latest
@@ -38,7 +37,10 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                bat 'kubectl apply -f deployment.yaml'
+                bat '''
+                kubectl config use-context minikube
+                kubectl apply -f deployment.yaml --validate=false
+                '''
             }
         }
     }
