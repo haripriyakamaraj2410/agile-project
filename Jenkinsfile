@@ -1,47 +1,19 @@
-pipeline {
-    agent any
-
-    environment {
-        IMAGE_NAME = "haripriyakamaraj2410/ecommerce-app"
-    }
-
-    stages {
-
-        stage('Clone Repository') {
-            steps {
-                git branch: 'main',
-                    url: 'https://github.com/haripriyakamaraj2410/agile-project.git'
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                bat 'docker build -t %IMAGE_NAME%:latest .'
-            }
-        }
-
-        stage('Push Image to DockerHub') {
-            steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'kubernets',
-                    usernameVariable: 'USERNAME',
-                    passwordVariable: 'PASSWORD'
-                )]) {
-                    bat '''
-                    echo %PASSWORD% | docker login -u %USERNAME% --password-stdin
-                    docker push %IMAGE_NAME%:latest
-                    '''
-                }
-            }
-        }
-
-        stage('Deploy to Kubernetes') {
-            steps {
-                bat '''
-                kubectl config use-context minikube
-                kubectl apply -f deployment.yaml --validate=false
-                '''
-            }
-        }
-    }
-}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecommerce-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ecommerce
+  template:
+    metadata:
+      labels:
+        app: ecommerce
+    spec:
+      containers:
+      - name: ecommerce-container
+        image: haripriyakamaraj2410/ecommerce-app:latest
+        ports:
+        - containerPort: 80
