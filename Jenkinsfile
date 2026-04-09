@@ -22,9 +22,13 @@ pipeline {
 
         stage('Push Image to DockerHub') {
             steps {
-                withCredentials([string(credentialsId: 'docker_kuber', variable: 'PASSWORD')]) {
+                withCredentials([usernamePassword(
+                    credentialsId: 'docker_kuber',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
                     bat '''
-                    echo %PASSWORD% | docker login -u haripriyakamaraj2410 --password-stdin
+                    echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
                     docker push %DOCKER_IMAGE%
                     '''
                 }
@@ -35,9 +39,8 @@ pipeline {
             steps {
                 bat '''
                 set KUBECONFIG=%KUBECONFIG_PATH%
-                kubectl config use-context minikube
-                kubectl apply -f deployment.yaml
-                kubectl apply -f service.yaml
+                kubectl apply -f deployment.yaml --validate=false
+                kubectl apply -f service.yaml --validate=false
                 '''
             }
         }
