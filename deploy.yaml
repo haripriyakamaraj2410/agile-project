@@ -20,7 +20,7 @@ spec:
       - name: ecommerce-container
         image: sarumathikm/ecommerce-app:latest
         ports:
-        - containerPort: 8080
+        - containerPort: 8081
 ---
 apiVersion: v1
 kind: Service
@@ -36,4 +36,4 @@ spec:
   ports:
   - port: 8080
     targetPort: 8080
-    nodePort: 30007
+    nodePort: 8081
